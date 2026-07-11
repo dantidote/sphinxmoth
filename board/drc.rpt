@@ -1,0 +1,54 @@
+** Drc report for ipod-cf-udma.kicad_pcb **
+** Created on 2026-06-28T21:44:12 **
+** Report includes: Errors **
+
+** Found 9 DRC violations **
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.1550 mm)
+    Rule: board setup constraints hole; error
+    @(111.3300 mm, 97.4700 mm): PTH pad [<no net>] of J2
+    @(114.3300 mm, 97.4700 mm): NPTH pad of J2
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.1550 mm)
+    Rule: board setup constraints hole; error
+    @(111.3300 mm, 136.2100 mm): PTH pad [<no net>] of J2
+    @(114.3300 mm, 136.2100 mm): NPTH pad of J2
+[pth_inside_courtyard]: PTH inside courtyard
+    Local override; error
+    @(132.3200 mm, 97.4000 mm): PTH pad SH [GND] of J4
+    @(111.4300 mm, 116.8400 mm): Footprint J2
+[pth_inside_courtyard]: PTH inside courtyard
+    Local override; error
+    @(132.3200 mm, 93.6000 mm): PTH pad SH [GND] of J4
+    @(111.4300 mm, 116.8400 mm): Footprint J2
+[pth_inside_courtyard]: PTH inside courtyard
+    Local override; error
+    @(123.6800 mm, 97.4000 mm): PTH pad SH [GND] of J4
+    @(111.4300 mm, 116.8400 mm): Footprint J2
+[pth_inside_courtyard]: PTH inside courtyard
+    Local override; error
+    @(123.6800 mm, 93.6000 mm): PTH pad SH [GND] of J4
+    @(111.4300 mm, 116.8400 mm): Footprint J2
+[npth_inside_courtyard]: NPTH inside courtyard
+    Local override; error
+    @(142.4600 mm, 106.0000 mm): NPTH pad of J3
+    @(111.4300 mm, 116.8400 mm): Footprint J2
+[npth_inside_courtyard]: NPTH inside courtyard
+    Local override; error
+    @(147.5400 mm, 104.9840 mm): NPTH pad of J3
+    @(111.4300 mm, 116.8400 mm): Footprint J2
+[npth_inside_courtyard]: NPTH inside courtyard
+    Local override; error
+    @(147.5400 mm, 107.0160 mm): NPTH pad of J3
+    @(111.4300 mm, 116.8400 mm): Footprint J2
+
+** Found 0 unconnected pads **
+
+** Found 0 Footprint errors **
+
+** Ignored checks **
+    - Footprint has no courtyard defined
+    - Track endpoint not centered on via
+    - Tuning profile track geometries
+    - Footprint doesn't match symbol's footprint filters
+    - Footprint component type doesn't match footprint pads
+
+** End of Report **

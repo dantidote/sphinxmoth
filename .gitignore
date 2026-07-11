@@ -1,0 +1,51 @@
+# Diamond build outputs (source of truth is gateware/rtl; validated
+# bitstreams are archived under releases/)
+diamond/impl1/*
+!diamond/impl1/impl1.xcf
+diamond/.recovery
+diamond/*.html
+diamond/dummy_sym*
+diamond/generate_core*
+diamond/promote.xml
+diamond/reportview.xml
+
+# simulation outputs
+*.vcd
+*.vvp
+
+# KiCad working-state snapshots (git history supersedes these)
+_preATA_backup/
+_preReroute_backup/
+_v1_backup/
+ipod-cf-udma-backups/
+*.kicad_pcb.zip
+*.kicad_pcb.*.bak
+*_bak.kicad_pcb
+*.kicad_prl
+_clrtest.kicad_prl
+fp-info-cache
+
+# tool logs / scratch
+greedy.log
+gen_kicad.log
+*.000
+
+# blinky bring-up: sources only
+gateware/blinky/impl1/
+gateware/blinky/reportview.xml
+gateware/genesis/board/.history/
+.history/
+
+# freerouting sessions / locks / schematic backups
+xo2*.dsn
+xo2*.ses
+*.ses
+*.lck
+~*.lck
+*.pre-csel-fix.bak
+
+# v2 working state
+board-v2/ipod-sd-udma-backups/
+diamond-sd/impl1/*
+!diamond-sd/impl1/impl1.xcf
+*.dsn

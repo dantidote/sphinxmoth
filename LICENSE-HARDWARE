@@ -1,0 +1,9 @@
+The hardware designs in this repository (schematics, PCB layouts, gerbers,
+and bills of materials -- the v1 board at the repository root and the v2
+board under board-v2/) are licensed under the CERN Open Hardware Licence
+Version 2 - Permissive (CERN-OHL-P-2.0).
+
+The full licence text: https://ohwr.org/cern_ohl_p_v2.txt
+
+Gateware, testbenches, and scripts are separately licensed under MIT (see
+LICENSE).
