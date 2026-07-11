@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "ipcf")(type "KiCad")(uri "${KIPRJMOD}/ipod-cf-udma.kicad_sym")(options "")(descr ""))
+)

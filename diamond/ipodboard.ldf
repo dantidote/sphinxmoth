@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BaliProject version="3.2" title="ipodboard" device="LCMXO2-2000HC-4TG100C" default_implementation="impl1">
+    <Options/>
+    <Implementation title="impl1" dir="impl1" description="impl1" synthesis="lse" default_strategy="Strategy1">
+        <Options def_top="fpga_top"/>
+        <Source name="../gateware/rtl/fpga_top.v" type="Verilog" type_short="Verilog">
+            <Options top_module="fpga_top"/>
+        </Source>
+        <Source name="../gateware/rtl/uart_tx.v" type="Verilog" type_short="Verilog">
+            <Options/>
+        </Source>
+        <Source name="../gateware/rtl/dbg_snoop.v" type="Verilog" type_short="Verilog">
+            <Options/>
+        </Source>
+        <Source name="../gateware/rtl/cf_init.v" type="Verilog" type_short="Verilog">
+            <Options/>
+        </Source>
+        <Source name="../gateware/rtl/cmd_snoop.v" type="Verilog" type_short="Verilog">
+            <Options/>
+        </Source>
+        <Source name="../gateware/rtl/crc16_udma.v" type="Verilog" type_short="Verilog">
+            <Options/>
+        </Source>
+        <Source name="../gateware/rtl/interposer_top.v" type="Verilog" type_short="Verilog">
+            <Options/>
+        </Source>
+        <Source name="../gateware/rtl/pio_passthru.v" type="Verilog" type_short="Verilog">
+            <Options/>
+        </Source>
+        <Source name="../gateware/rtl/sync_fifo.v" type="Verilog" type_short="Verilog">
+            <Options/>
+        </Source>
+        <Source name="../gateware/rtl/udma_capture.v" type="Verilog" type_short="Verilog">
+            <Options/>
+        </Source>
+        <Source name="../gateware/rtl/udma_device.v" type="Verilog" type_short="Verilog">
+            <Options/>
+        </Source>
+        <Source name="../gateware/rtl/udma_host.v" type="Verilog" type_short="Verilog">
+            <Options/>
+        </Source>
+        <Source name="impl1/impl1.xcf" type="Programming Project File" type_short="Programming">
+            <Options/>
+        </Source>
+        <Source name="ipodboard.lpf" type="Logic Preference" type_short="LPF">
+            <Options/>
+        </Source>
+    </Implementation>
+    <Strategy name="Strategy1" file="ipodboard1.sty"/>
+</BaliProject>
