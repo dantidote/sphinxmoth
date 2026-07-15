@@ -1,0 +1,23 @@
+%TF.GenerationSoftware,KiCad,Pcbnew,10.0.1*%
+%TF.CreationDate,2026-07-10T20:05:17-04:00*%
+%TF.ProjectId,ipod-sd-udma,69706f64-2d73-4642-9d75-646d612e6b69,rev?*%
+%TF.SameCoordinates,Original*%
+%TF.FileFunction,Profile,NP*%
+%FSLAX46Y46*%
+G04 Gerber Fmt 4.6, Leading zero omitted, Abs format (unit mm)*
+G04 Created by KiCad (PCBNEW 10.0.1) date 2026-07-10 20:05:17*
+%MOMM*%
+%LPD*%
+G01*
+G04 APERTURE LIST*
+%TA.AperFunction,Profile*%
+%ADD10C,0.100000*%
+%TD*%
+G04 APERTURE END LIST*
+D10*
+X107500000Y-126530000D02*
+X145500000Y-126530000D01*
+X145500000Y-162530000D01*
+X107500000Y-162530000D01*
+X107500000Y-126530000D01*
+M02*

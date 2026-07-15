@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BaliProject version="3.2" title="ipodboard_sd" device="LCMXO2-7000HC-4TG144C" default_implementation="impl1">
+    <Options/>
+    <Implementation title="impl1" dir="impl1" description="impl1" synthesis="lse" default_strategy="Strategy1">
+        <Options def_top="fpga_top_sd"/>
+        <Source name="../gateware/rtl/fpga_top_sd.v" type="Verilog" type_short="Verilog">
+            <Options top_module="fpga_top_sd"/>
+        </Source>
+        <Source name="../gateware/rtl/uart_tx.v" type="Verilog" type_short="Verilog">
+            <Options/>
+        </Source>
+        <Source name="../gateware/rtl/dbg_snoop.v" type="Verilog" type_short="Verilog">
+            <Options/>
+        </Source>
+        <Source name="../gateware/rtl/crc16_udma.v" type="Verilog" type_short="Verilog">
+            <Options/>
+        </Source>
+        <Source name="../gateware/rtl/sync_fifo.v" type="Verilog" type_short="Verilog">
+            <Options/>
+        </Source>
+        <Source name="../gateware/rtl/udma_capture.v" type="Verilog" type_short="Verilog">
+            <Options/>
+        </Source>
+        <Source name="../gateware/rtl/udma_device.v" type="Verilog" type_short="Verilog">
+            <Options/>
+        </Source>
+        <Source name="../gateware/rtl/sd_host.v" type="Verilog" type_short="Verilog">
+            <Options/>
+        </Source>
+        <Source name="../gateware/rtl/backend_sd.v" type="Verilog" type_short="Verilog">
+            <Options/>
+        </Source>
+        <Source name="../gateware/rtl/ata_device.v" type="Verilog" type_short="Verilog">
+            <Options/>
+        </Source>
+        <Source name="../gateware/rtl/ipod_sd_top.v" type="Verilog" type_short="Verilog">
+            <Options/>
+        </Source>
+        <Source name="ipodboard_sd.lpf" type="Logic Preference" type_short="LPF">
+            <Options/>
+        </Source>
+    </Implementation>
+    <Strategy name="Strategy1" file="ipodboard_sd1.sty"/>
+</BaliProject>

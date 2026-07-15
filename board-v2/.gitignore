@@ -1,0 +1,9 @@
+*.dsn
+*.ses
+fr.log
+frhelp.txt
+*_err.txt
+drc_pre.json
+drc_post.json
+geom.json
+t.kicad_pcb
