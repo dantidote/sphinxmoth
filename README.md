@@ -29,6 +29,17 @@ question: is this possible at all?
 <p align="center"><i>A 1.8 GB file at roughly 15 MB/s over FireWire, through the bridge. No, the
 1st gen can't play it. That's not the point.</i></p>
 
+## Buying an assembled board
+
+Sphinxmoth is open source and stays that way: the gerbers, BOM, gateware and
+a hardware-validated bitstream are all in this repo, under licenses (MIT and
+CERN-OHL-P-2.0) that let you build your own, and sell them if you want to.
+Please do.
+
+If you would rather not order a PCB, source a MachXO2, and go find a JTAG
+probe, I sell **pre-assembled, pre-flashed boards** at
+**[wunkuslabs.com](https://wunkuslabs.com/products/sphinxmoth)**.
+
 ## Why the cheap green CF/IDE adapters never worked
 
 FireWire-era iPods (1G/2G, and the 3G) use TI's **TSB43AA82 "iSphynxII"**
@@ -117,6 +128,9 @@ polls, and rings its strobe line. Every cruelty in the sims reproduced a bug
 first found on real hardware during a two-day, fourteen-bug bring-up.
 
 ## Building it
+
+Or skip it: assembled, flashed and tested boards are
+[for sale](https://wunkuslabs.com/products/sphinxmoth).
 
 **Board (v1):** upload `board/ipod-cf-udma-gerbers.zip` to any fab (2 layer,
 53×72 mm, 1.6 or 0.8 mm). CF socket (J2) is on the BACK; everything else on
