@@ -1,0 +1,39 @@
+pp5002: select IDE bus timing by clock and pace PIO data writes
+
+The PP5002 ATA driver programs one fixed IDE controller timing
+(0x10 / 0x80002150, copied from iPodLinux) and never revisits it.
+The retail firmware selects the timing pair, and bit 2 of the IDE
+config register, from the current clock configuration; 0x10 is only
+one entry of that table.
+
+With an original 1.8" drive this does not matter. With flash storage
+behind a bridge that adds latency on the read side it does:
+
+ * At 80 MHz (boosted, which is where ata_init() runs) 0x10 is too fast
+   and taskfile readback fails, so init dies with "ATA error: -32".
+   The retail's 80 MHz entry (0x11c1 / 0x80003261, cfg bit 2 set) works.
+   Conversely that entry does not work at 30 MHz, where 0x10 does.
+
+ * Once a slower timing is in use, every write fails with -4: the
+   controller posts data register writes, and copy_write_sectors()
+   stores words faster than the bus can complete them. Overrun words
+   are silently dropped and the device waits on DRQ for the rest of
+   the block. Taskfile writes already wait on the controller idle bit
+   (ATA_OUT8); do the same for data words (ATA_OUT16).
+
+So: program the timing from set_cpu_frequency() and ata_device_init()
+according to the clock, using the retail values, and pace data writes
+on the idle bit. The bootloader keeps the historical constant, since
+it runs at whatever clock the ROM left and has no frequency scaling.
+
+This mirrors what the PP502x port did in 2014 when it switched from
+0x10 to the OF timing table for mSATA and SD adapters.
+
+Verified on an iPod 2G with a MachXO2 CF interposer, with both an
+FC1307A SD-to-CF adapter and a genuine CF card: boot, reads, and
+writes (disk cache flush, config write) all succeed; before the
+change, each of the two failures above was reproduced on the same
+hardware. The 30 MHz / 0x10 pairing was verified for init and reads.
+Not yet tested on an original drive or on an iPod 3G.
+
+Change-Id: I0000000000000000000000000000000000000000

@@ -1,0 +1,164 @@
+name: Rockbox builds for Sphinxmoth
+
+# Builds Rockbox for the iPod 1G/2G and 3G with rockbox/pp5002-sphinxmoth.patch
+# applied (clock-keyed IDE timing + paced PIO writes), so it runs on boards that
+# are still on the v1.1-mg132-fix3b bridge image.
+#
+#  - weekly: builds the newest upstream release tag if it has not been built yet
+#    and publishes it as a GitHub release "rockbox-<tag>-sphinxmoth"
+#  - on demand: builds any Rockbox ref (tag, branch, commit); publish is optional
+#
+# The output is NOT hardware-tested by this workflow. Test a build on a fix3b
+# board (boot, a write, playback) before pointing customers at it.
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Rockbox git ref to build (tag such as v4.0-final, or master)"
+        required: true
+        default: "master"
+      publish:
+        description: "Publish the result as a GitHub release"
+        type: boolean
+        default: false
+  schedule:
+    - cron: "17 6 * * 1"
+
+permissions:
+  contents: write
+
+env:
+  RBDEV_PREFIX: /opt/rbdev
+  TARGETS: ipod1g2g ipod3g
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check out this repo
+        uses: actions/checkout@v4
+        with:
+          path: sphinxmoth
+
+      - name: Pick the Rockbox ref
+        id: pick
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            ref="${{ inputs.ref }}"
+            publish="${{ inputs.publish }}"
+          else
+            ref=$(git ls-remote --tags --refs https://github.com/Rockbox/rockbox.git 'v*' \
+                  | awk -F/ '{print $NF}' | grep -E '^v[0-9]+\.[0-9]+(\.[0-9]+)?(-final)?$' | sort -V | tail -1)
+            publish=true
+            if gh release view "rockbox-${ref}-sphinxmoth" -R "${{ github.repository }}" >/dev/null 2>&1; then
+              echo "release rockbox-${ref}-sphinxmoth already exists, nothing to do"
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+          echo "Rockbox ref: $ref (publish=$publish)"
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+          echo "publish=$publish" >> "$GITHUB_OUTPUT"
+
+      - name: Check out Rockbox
+        if: steps.pick.outputs.skip != 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: Rockbox/rockbox
+          ref: ${{ steps.pick.outputs.ref }}
+          path: rockbox
+          fetch-depth: 1
+
+      - name: Apply the Sphinxmoth patch
+        if: steps.pick.outputs.skip != 'true'
+        run: |
+          set -eu
+          cd rockbox
+          git apply --stat ../sphinxmoth/rockbox/pp5002-sphinxmoth.patch
+          git apply ../sphinxmoth/rockbox/pp5002-sphinxmoth.patch
+          git diff --stat
+
+      - name: Host packages
+        if: steps.pick.outputs.skip != 'true'
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q build-essential texinfo flex bison libgmp-dev libmpfr-dev libmpc-dev \
+            zip unzip perl python3 automake libtool wget curl
+
+      - name: Cache the ARM cross toolchain
+        if: steps.pick.outputs.skip != 'true'
+        id: tc
+        uses: actions/cache@v4
+        with:
+          path: /opt/rbdev
+          key: rbdev-arm-${{ hashFiles('rockbox/tools/rockboxdev.sh') }}
+
+      - name: Build the ARM cross toolchain (cache miss)
+        if: steps.pick.outputs.skip != 'true' && steps.tc.outputs.cache-hit != 'true'
+        run: |
+          set -eu
+          sudo mkdir -p "$RBDEV_PREFIX" && sudo chown "$USER" "$RBDEV_PREFIX"
+          mkdir -p /tmp/rbdev-dl
+          rm -rf /tmp/rbdev-build   # the script insists the build dir does not exist yet
+          cd rockbox
+          ./tools/rockboxdev.sh --target=a --prefix="$RBDEV_PREFIX" --dlwhere=/tmp/rbdev-dl --builddir=/tmp/rbdev-build
+          ls "$RBDEV_PREFIX/bin"
+
+      - name: Build the targets
+        if: steps.pick.outputs.skip != 'true'
+        run: |
+          set -eu
+          export PATH="$RBDEV_PREFIX/bin:$PATH"
+          arm-elf-eabi-gcc --version | head -1
+          mkdir -p out
+          for t in $TARGETS; do
+            echo "=== $t"
+            rm -rf "rockbox/build-$t" && mkdir "rockbox/build-$t" && cd "rockbox/build-$t"
+            ../tools/configure --target="$t" --type=n
+            make -j"$(nproc)" >/dev/null
+            make zip >/dev/null
+            mkdir -p "../../out/$t"
+            cp rockbox.ipod "../../out/$t/rockbox.ipod"
+            cp rockbox.zip "../../out/$t/rockbox-$t-sphinxmoth.zip"
+            cp rockbox-info.txt "../../out/$t/rockbox-info.txt"
+            ( cd "../../out/$t" && sha256sum rockbox.ipod "rockbox-$t-sphinxmoth.zip" > checksums.txt && cat checksums.txt )
+            cd ../..
+          done
+          grep -h "^Version" out/*/rockbox-info.txt | sort -u
+
+      - name: Upload build artifacts
+        if: steps.pick.outputs.skip != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: rockbox-${{ steps.pick.outputs.ref }}-sphinxmoth
+          path: out/
+          if-no-files-found: error
+
+      - name: Publish as a GitHub release
+        if: steps.pick.outputs.skip != 'true' && steps.pick.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          ref="${{ steps.pick.outputs.ref }}"
+          tag="rockbox-${ref}-sphinxmoth"
+          ver=$(grep -h "^Version" out/ipod1g2g/rockbox-info.txt | cut -d' ' -f2)
+          rm -rf release && mkdir release
+          for t in $TARGETS; do
+            cp "out/$t/rockbox.ipod" "release/rockbox-$t-sphinxmoth.ipod"
+            cp "out/$t/rockbox-$t-sphinxmoth.zip" release/
+          done
+          ( cd release && sha256sum * > SHA256SUMS.txt )
+          notes="Rockbox ${ver} (upstream ref ${ref}) for iPod 1G/2G and 3G with rockbox/pp5002-sphinxmoth.patch applied: clock-keyed IDE timing and paced PIO data writes, for Sphinxmoth boards on the fix3b bridge image.
+
+Install Rockbox for your iPod with Rockbox Utility, then copy the .ipod file for your model over .rockbox/rockbox.ipod (rename it to rockbox.ipod), or unzip the full .zip over the iPod. Built automatically; not hardware-tested by this workflow."
+          case "$ref" in master|main) pre="--prerelease --latest=false" ;; *) pre="" ;; esac
+          if gh release view "$tag" -R "${{ github.repository }}" >/dev/null 2>&1; then
+            gh release upload "$tag" release/* --clobber -R "${{ github.repository }}"
+            gh release edit "$tag" --notes "$notes" -R "${{ github.repository }}"
+          else
+            gh release create "$tag" release/* --title "Rockbox ${ver} for Sphinxmoth" --notes "$notes" $pre -R "${{ github.repository }}"
+          fi

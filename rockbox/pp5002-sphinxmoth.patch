@@ -1,0 +1,117 @@
+--- a/firmware/target/arm/pp/ata-target.h
++++ b/firmware/target/arm/pp/ata-target.h
+@@ -40,6 +40,21 @@
+                               while (!(IDE_CFG_STATUS & 0x40)); \
+                           } while (0)
+ 
++/* The controller posts data register writes too. If the CPU stores words
++ * faster than the bus timing lets them complete, the overrun words are
++ * silently dropped and the device sits on DRQ waiting for the rest of the
++ * block (ata_transfer_sectors then fails with -4 on every write). This is
++ * invisible with the stock 0x10 timing and an original drive, but shows up
++ * as soon as slower bus timings are used. Wait for the idle bit after each
++ * data word, as ATA_OUT8 already does for taskfile writes. */
++#define ATA_OUT16(reg,val) do { reg = (val); \
++                               while (!(IDE_CFG_STATUS & 0x40)); \
++                           } while (0)
++
++/* Program the IDE controller's cycle timing for the given CPU frequency.
++ * Called from set_cpu_frequency() and from ata_device_init(). */
++void ata_set_bus_timings(long frequency);
++
+ /* Plain C reading and writing. See comment in ata-as-arm.S */
+ 
+ #elif defined CPU_PP502x
+--- a/firmware/target/arm/pp/ata-pp5002.c
++++ b/firmware/target/arm/pp/ata-pp5002.c
+@@ -23,6 +23,49 @@
+ #include <stdbool.h>
+ #include "system.h"
+ #include "ata-driver.h"
++#include "ata-target.h"
++
++/* IDE controller cycle timing.
++ *
++ * The retail firmware (1G/2G 1.1.5 osos) does not use one fixed setting; it
++ * picks the pair of timing registers, and bit 2 of the config register, from
++ * the current clock configuration. 0x10 / 0x80002150 is only one entry of
++ * that table (iPodLinux copied it as a constant, and Rockbox inherited it).
++ *
++ * With an original drive any of these work. With flash storage behind a
++ * bridge that adds latency on the read side, 0x10 at 80 MHz makes taskfile
++ * readback fail (ATA error -32), while the retail's 80 MHz entry works.
++ * Conversely the 80 MHz entry does not work at 30 MHz. So follow the retail
++ * firmware and select by clock.
++ *
++ * Verified on an iPod 2G with a MachXO2 CF bridge and both an FC1307A
++ * SD-to-CF adapter and a genuine CF card:
++ *   30 MHz: 0x10   / 0x80002150, cfg bit 2 clear
++ *   80 MHz: 0x11c1 / 0x80003261, cfg bit 2 set
++ * The retail table has two further entries (0x4121 / 0x8000ffff and
++ * 0x1181 / 0x8000ffff) whose clock keys were not decoded.
++ */
++#define IDE_TIMING0     (*(volatile unsigned long *)(0xc0003000))
++#define IDE_TIMING1     (*(volatile unsigned long *)(0xc0003004))
++
++void ata_set_bus_timings(long frequency)
++{
++    unsigned long cfg = IDE_CFG_STATUS & ~(1 << 2);
++
++    if (frequency == CPUFREQ_MAX)
++    {
++        IDE_TIMING0 = 0x11c1;
++        IDE_TIMING1 = 0x80003261;
++        cfg |= (1 << 2);
++    }
++    else
++    {
++        IDE_TIMING0 = 0x10;
++        IDE_TIMING1 = 0x80002150;
++    }
++
++    IDE_CFG_STATUS = cfg;
++}
+ 
+ void ata_reset() 
+ {
+@@ -43,10 +86,14 @@
+ 
+ void ata_device_init()
+ {
+-   /* From ipod-ide.c:ipod_ide_register() */
+-    outl(inl(0xc0003024) | (1 << 7), 0xc0003024);
+-    outl(inl(0xc0003024) & ~(1<<2), 0xc0003024);
++    /* From ipod-ide.c:ipod_ide_register() */
++    IDE_CFG_STATUS |= (1 << 7);
+ 
+-    outl(0x10, 0xc0003000);
+-    outl(0x80002150, 0xc0003004);
++#ifdef HAVE_ADJUSTABLE_CPU_FREQ
++    ata_set_bus_timings(cpu_frequency);
++#else
++    /* Bootloader: the clock is whatever the ROM left us with. Keep the
++       historical setting, which is known to work there. */
++    ata_set_bus_timings(CPUFREQ_DEFAULT);
++#endif
+ }
+--- a/firmware/target/arm/pp/system-pp5002.c
++++ b/firmware/target/arm/pp/system-pp5002.c
+@@ -18,6 +18,7 @@
+  *
+  ****************************************************************************/
+ #include "system.h"
++#include "ata-target.h"
+ 
+ #ifndef BOOTLOADER
+ #include "adc-target.h"
+@@ -180,6 +181,10 @@
+         break;
+     }
+     CLOCK_ENABLE = 0x02;       /* select source #2 */
++
++    /* The IDE controller's cycle timing is only valid for the clock it was
++       chosen for; retune it, like the retail firmware does. */
++    ata_set_bus_timings(cpu_frequency);
+ }
+ #endif /* !BOOTLOADER */
+ 
