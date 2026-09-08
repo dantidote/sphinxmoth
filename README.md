@@ -106,6 +106,22 @@ Tested on: iPod 1st gen (firmware 1.5), Transcend industrial 2 GB CF,
 FC1307A SD-CF adapter + 256 GB SD, Mac OS X 10.6 + iTunes over FireWire.
 2G/3G iPods use the same TSB43AA82 and *should* work; reports welcome.
 
+## Rockbox
+
+Rockbox runs on a Sphinxmoth iPod, with two board-specific wrinkles: the
+Rockbox 4.0 release crashes at boot on every 1G/2G (an unaligned store in
+the PP5002 scheduler, fixed upstream after 4.0), and Rockbox's stock IDE
+timing is too fast for the `v1.1-mg132-fix3b` bridge image, which adds
+about 45 ns to every register read through its PIO synchroniser (init fails
+with `ATA error: -11` or `-32`). Newer bridge images pass PIO through the
+raw pads and need nothing but the crash fix.
+
+Everything Rockbox-related lives in its own repo:
+[**sphinxmoth-rockbox**](https://github.com/dantidote/sphinxmoth-rockbox):
+the ATA driver patch, tested builds for boards already in the field on
+fix3b, and a workflow that rebuilds them on each upstream Rockbox release.
+The same files are served from [wunkuslabs.com/guide](https://wunkuslabs.com/guide#rockbox).
+
 ## How it works (the short version)
 
 The FPGA discovered during bring-up that it serves **three masters**, and it
