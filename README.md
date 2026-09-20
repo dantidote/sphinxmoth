@@ -117,7 +117,7 @@ with `ATA error: -11` or `-32`). Newer bridge images pass PIO through the
 raw pads and need nothing but the crash fix.
 
 Everything Rockbox-related lives in its own repo:
-[**sphinxmoth-rockbox**](https://github.com/dantidote/sphinxmoth-rockbox):
+[**rockbox-pp5002-flash**](https://github.com/dantidote/rockbox-pp5002-flash):
 the ATA driver patch, tested builds for boards already in the field on
 fix3b, and a workflow that rebuilds them on each upstream Rockbox release.
 The same files are served from [wunkuslabs.com/guide](https://wunkuslabs.com/guide#rockbox).
